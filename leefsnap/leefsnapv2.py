@@ -29,15 +29,16 @@ class library(object):
         one method """
         errorcount = 0
         for _ in xrange(self.size):
-            # print self.index
+            # print(self.index)
             try:
                 self.addLeaf()
             except LeafError as e:
                  errorcount += 1
-                 print e
-        print "failed to segment {} images of {}.".format(errorcount, self.size)
-        # print self.leafInfo[0:2]
-        # print self.leafPoints[0:2]
+                 print(e)
+        print("Failed to segment {} images of {}.".format(
+            errorcount, self.size))
+        # print(self.leafInfo[0:2])
+        # print(self.leafPoints[0:2])
         self.neighbors = NearestNeighbors(n_neighbors = 1, algorithm = 'auto'
             ).fit(self.leafPoints)
 
@@ -46,12 +47,12 @@ class library(object):
         string of the name of the species that it ought to be. """
         newLeaf = leaf(id = id, filename = filename, species = 'Unknown')
         newLeaf.findContours()
-        # print self.leafPoints.shape
-        # print newLeaf.points.shape
+        # print(self.leafPoints.shape)
+        # print(newLeaf.points.shape)
         distances, indices = self.neighbors.kneighbors([
             newLeaf.points.flatten()])
-        # print "indices = \n", indices[0][0]
-        # print "distances = \n", distances[0][0]
+        # print("indices = \n", indices[0][0])
+        # print("distances = \n", distances[0][0])
 
         return self.leafInfo[indices[0][0]][3]
 
@@ -64,7 +65,7 @@ class library(object):
         newInfo = self.readLine()
         id, image_path, segmented_path, species, kind = newInfo
         try:
-            # print id
+            # print(id)
             self.leafInfo[self.index] = [id, image_path, segmented_path,
                 species, kind]
             thisLeaf = leaf(id, 'leafsnap-dataset/' + image_path, species)
@@ -81,7 +82,7 @@ class library(object):
 
         # thisLeaf.showImage()
         # thisLeaf.showPoints()
-        # print thisLeaf.points
+        # print(thisLeaf.points)
 
     def readLine(self):
         nextline = self.file.readline()
@@ -91,41 +92,41 @@ class library(object):
     def test(self):
         """ tests the library by using every other image as a training set, and
         every other image as a test set"""
-        print "starting"
+        print("starting")
         testSet = []
         correct = 0
         total = 0
         segfail = 0
         for _ in xrange(self.size):
-            print "Added {} leaves to library".format(self.index)
+            print("Added {} leaves to library".format(self.index))
             self.addLeaf()
             testSet.append(self.readLine())
-        print "built library"
+        print("built library")
         self.neighbors = NearestNeighbors(n_neighbors = 3, algorithm = 'auto'
             ).fit(self.leafPoints)
-        print "created nearest neighbors matching, testing library"
+        print("created nearest neighbors matching, testing library")
         for elt in testSet:
             try:
                 guess = self.matchLeaf('leafsnap-dataset/' + elt[1], elt[0])
                 rightAnswer = elt[3]
-                print "guesses -- ",
+                print("guesses -- "),
                 for g in guess:
-                    print " {}, ".format(g),
-                print "Correct answer -- {}.".format(rightAnswer),
+                    print(" {}, ".format(g)),
+                print("Correct answer -- {}.".format(rightAnswer), )
                 if rightAnswer in guess:
                     correct += 1
-                    print "CORRECT!"
+                    print("CORRECT!")
                 else:
-                    print "WRONG!"
+                    print("WRONG!")
             except LeafError:
                 segfail += 1
 
             total += 1
-        print "finished"
-        print "Got {} out of {} right, {:.3f} % accuracy".format(correct, total,
-            float(100 * correct) / total)
-        print "Failed to segment {} out of {} ({:.3f} %)".format(segfail, total,
-            float(100 * segfail) / total)
+        print("Finished")
+        print("Got {} out of {} right, {:.3f} % accuracy".format(correct, total,
+            float(100 * correct) / total))
+        print("Failed to segment {} out of {} ({:.3f} %)".format(segfail, total,
+            float(100 * segfail) / total))
 
     def save(self):
         """ saves the important (time-intensive to generate) parts to file """
@@ -168,7 +169,7 @@ class leaf(object):
         mask until a key is pressed
         Returns false if it fails, true otherwise"""
         if self.mask is None:
-            # print "there's no mask"
+            # print("there's no mask")
             return False
         cv2.imshow(caption, self.mask)
         while cv2.waitKey() < 15: pass
@@ -254,8 +255,8 @@ class leaf(object):
             ).astype('int32')
         indices = np.linspace(0, biggestContour.shape[1] - 1, NUM_POINTS).tolist()
         indices = [int(x) for x in indices]
-        # print biggestContour.shape
-        # print indices
+        # print(biggestContour.shape)
+        # print(indices)
         self.points = np.array([ [biggestContour[0][i], biggestContour[1][i] ]
             for i in indices])
         self.points.sort(0)
